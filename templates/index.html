@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISP Billing Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 50%, #2563eb 100%);
+            color: white;
+            padding: 35px 40px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #dbeafe;
+            font-size: 1rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid #2563eb;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.overdue {
+            border-left-color: #dc2626;
+        }
+
+        .stat-card.active {
+            border-left-color: #16a34a;
+        }
+
+        .stat-card h3 {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel h2 {
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            color: #111827;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover {
+            background: #991b1b;
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-verified {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: #f3f4f6;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 700;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🌐 ISP Accounts & Collections</h1>
+                <p>Unified payment tracking and account monitoring dashboard</p>
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card active">
+                <h3>💰 Total Collected</h3>
+                <div class="value">KSh {{ "%.0f"|format(data.total_collected) }}</div>
+            </div>
+            <div class="stat-card active">
+                <h3>✅ Active Accounts</h3>
+                <div class="value">{{ data.active_accounts }}</div>
+            </div>
+            <div class="stat-card overdue">
+                <h3>⚠️ Overdue / Pending</h3>
+                <div class="value">{{ data.overdue }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>✓ Verified Receipts</h3>
+                <div class="value">{{ data.verified }}</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2>👥 Customer Accounts</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Package</th>
+                                <th>Status</th>
+                                <th>Balance</th>
+                                <th>Last Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if data.customers %}
+                                {% for customer in data.customers %}
+                                <tr>
+                                    <td><strong>{{ customer["name"] }}</strong></td>
+                                    <td>{{ customer["package"] }}</td>
+                                    <td>
+                                        <span class="status-badge status-{% if customer['status'] == 'Active' %}active{% elif customer['status'] == 'Pending' %}pending{% else %}overdue{% endif %}">
+                                            {{ customer["status"] }}
+                                        </span>
+                                    </td>
+                                    <td>KSh {{ "%.0f"|format(customer["balance"]) }}</td>
+                                    <td>{{ customer["last_payment"] }}</td>
+                                    <td>
+                                        <div class="action-cell">
+                                            <form method="POST" action="/update-status/{{ customer['id'] }}" style="display: inline;">
+                                                <select name="status" style="padding: 6px 8px; font-size: 0.8rem;" onchange="this.form.submit();">
+                                                    <option value="Active" {% if customer['status'] == 'Active' %}selected{% endif %}>Active</option>
+                                                    <option value="Pending" {% if customer['status'] == 'Pending' %}selected{% endif %}>Pending</option>
+                                                    <option value="Overdue" {% if customer['status'] == 'Overdue' %}selected{% endif %}>Overdue</option>
+                                                </select>
+                                            </form>
+                                            <form method="POST" action="/delete-customer/{{ customer['id'] }}" style="display: inline;" onsubmit="return confirm('Delete this customer and all records?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="empty-state">No customers found</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>💳 Record Payment</h2>
+                <form method="POST" action="/add-payment">
+                    <div class="form-group">
+                        <label for="customer_name">Customer Name *</label>
+                        <input type="text" id="customer_name" name="customer_name" placeholder="Enter customer name" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="0712345678">
+                        </div>
+                        <div class="form-group">
+                            <label for="package">Package *</label>
+                            <select id="package" name="package" required>
+                                <option value="">Select package</option>
+                                <option value="Home 10 Mbps">Home 10 Mbps</option>
+                                <option value="Home 20 Mbps">Home 20 Mbps</option>
+                                <option value="Home 30 Mbps">Home 30 Mbps</option>
+                                <option value="Family 30 Mbps">Family 30 Mbps</option>
+                                <option value="Business 50 Mbps">Business 50 Mbps</option>
+                                <option value="Business 100 Mbps">Business 100 Mbps</option>
+                                <option value="Student 10 Mbps">Student 10 Mbps</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Amount Paid *</label>
+                            <input type="number" id="amount" name="amount" placeholder="2500" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="balance">Current Balance</label>
+                            <input type="number" id="balance" name="balance" placeholder="0" step="0.01" value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" name="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Overdue">Overdue</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment_date">Payment Date *</label>
+                            <input type="date" id="payment_date" name="payment_date" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="payment_method">Payment Method *</label>
+                            <select id="payment_method" name="payment_method" required>
+                                <option value="">Select method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Mobile Money">Mobile Money</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Check">Check</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="receipt_no">Receipt Number *</label>
+                            <input type="text" id="receipt_no" name="receipt_no" placeholder="RCPT-001" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">💾 Save Payment</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel full-width">
+            <h2>📝 Payment Transactions</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Receipt</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if data.payments %}
+                            {% for payment in data.payments %}
+                            <tr>
+                                <td><strong>{{ payment["customer_name"] }}</strong></td>
+                                <td>KSh {{ "%.0f"|format(payment["amount"]) }}</td>
+                                <td>{{ payment["payment_method"] }}</td>
+                                <td><code>{{ payment["receipt_no"] }}</code></td>
+                                <td>{{ payment["payment_date"] }}</td>
+                                <td>
+                                    <span class="status-badge status-{% if payment['status'] == 'Verified' %}verified{% else %}pending{% endif %}">
+                                        {{ payment["status"] }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        {% if payment['status'] != 'Verified' %}
+                                            <form method="POST" action="/verify-receipt/{{ payment['id'] }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-success btn-sm">✓ Verify</button>
+                                            </form>
+                                        {% endif %}
+                                        <form method="POST" action="/delete-payment/{{ payment['id'] }}" style="display: inline;" onsubmit="return confirm('Delete this payment record?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="empty-state">No payment transactions found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
